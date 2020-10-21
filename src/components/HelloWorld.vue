@@ -1,6 +1,8 @@
 <template>
     <div class="hello">
         <h1 class="marDown"> {{ msg }}</h1>
+        <status-indicator v-if="connected" status="positive"/>
+        <status-indicator v-else status="negative" />
         <!--        <div class="centerTh">-->
         <!--            <progress-bar-->
         <!--                    :options="options"-->
@@ -27,7 +29,6 @@
         ></month-picker-input>
         <date-range-picker
                 v-show="false"
-                :opens="true"
                 v-model="dateRange"
                 @update="updateDate"
         >
@@ -54,6 +55,7 @@
     import axios from 'axios'
     // import ProgressBar from 'vuejs-progress-bar'
     // import * as https from "https";
+    import { StatusIndicator } from 'vue-status-indicator';
     import DateRangePicker from 'vue2-daterange-picker'
     import SockJS from "sockjs-client"
     import Stomp from "webstomp-client"
@@ -67,7 +69,7 @@
             msg: String
         },
         components: {
-            MonthPickerInput, DateRangePicker
+            MonthPickerInput, DateRangePicker, StatusIndicator
             // ProgressBar
         },
         data: function () {
@@ -196,7 +198,9 @@
                 {},
                 frame => {
                     console.log(frame);
-                    this.connected = true;
+
+                    const self = this;
+
                     this.stompClient.subscribe("/topic/messages", message => {
                         console.log(message);
                         console.log(message.body.injectionProgress);
@@ -205,6 +209,11 @@
                         this.callsInjected = body.callsInjected
                         this.callsPerSecond = body.callsPerSecond
                         this.remainingSeconds = body.remainingSeconds
+
+                        self.$nextTick(function() {
+                            self.connected = true
+                        })
+
                         // this.received_messages.push(JSON.parse(message.body).content);
                     });
                 },
