@@ -154,8 +154,7 @@
                     })
             },
             sendStopRequest: function () {
-                axios.delete
-                ('http://localhost:9090/stop')
+                axios.delete('http://localhost:9090/stop')
                     .then(response => {
                         console.log(response.data)
                         if(response.status === 200){
