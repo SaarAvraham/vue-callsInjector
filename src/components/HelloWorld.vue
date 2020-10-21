@@ -15,7 +15,7 @@
             >
                 <b-form-input
                         id="input-1"
-                        v-model="form.callsToInject"
+                        v-model="searchRequest.callsToInject"
                         type="number"
                         required
                         placeholder="Enter the amount of calls to inject"
@@ -90,7 +90,8 @@
                 max: 100,
                 stompClient: undefined,
                 connected: false,
-                date: {
+                searchRequest: {
+                    callsToInject: undefined,
                     rangeFromMonth: null,
                     rangeToMonth: null,
                     year: null
@@ -144,7 +145,7 @@
                 //     rejectUnauthorized: false
                 // });
 
-                axios.get('http://localhost:9090/start', this.date)
+                axios.post('http://localhost:9090/start', this.searchRequest)
                     .then(response => {
                         console.log(response.data)
                         if(response.status === 200){
@@ -153,7 +154,8 @@
                     })
             },
             sendStopRequest: function () {
-                axios.get('http://localhost:9090/stop', this.date)
+                axios.delete
+                ('http://localhost:9090/stop')
                     .then(response => {
                         console.log(response.data)
                         if(response.status === 200){
@@ -162,9 +164,9 @@
                     })
             },
             saveDate: function (date) {
-                this.date.rangeFromMonth = date.rangeFrom
-                this.date.rangeToMonth = date.rangeTo
-                this.date.year = date.year
+                this.searchRequest.rangeFromMonth = date.rangeFrom
+                this.searchRequest.rangeToMonth = date.rangeTo
+                this.searchRequest.year = date.year
                 console.log('Current date is:')
                 console.log(this.date)
             }
