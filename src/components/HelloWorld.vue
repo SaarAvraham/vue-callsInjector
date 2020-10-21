@@ -1,13 +1,13 @@
 <template>
     <div class="hello">
-        <h1 class="marDown" > {{ msg }}</h1>
-<!--        <div class="centerTh">-->
+        <h1 class="marDown"> {{ msg }}</h1>
+        <!--        <div class="centerTh">-->
         <!--            <progress-bar-->
         <!--                    :options="options"-->
         <!--                    :value="injectionProgress"-->
         <!--            />-->
         <!--        </div>-->
-        <b-form >
+        <b-form>
             <b-form-group
                     id="input-group-1"
                     label="Number of calls:"
@@ -15,15 +15,19 @@
             >
                 <b-form-input
                         id="input-1"
-                        v-model="form.email"
+                        v-model="form.callsToInject"
                         type="number"
                         required
-                        placeholder="Enter a number of calls to inject"
+                        placeholder="Enter the amount of calls to inject"
+                        style="width: auto; justify-content: center; display: flex; margin:auto; "
                 ></b-form-input>
             </b-form-group>
         </b-form>
-        <month-picker-input class="centerTh1" @change="saveDate" :range="true" v-show="false"></month-picker-input>
+        <month-picker-input class="centerTh1" @change="saveDate" :range="true" v-show="true"
+        ></month-picker-input>
         <date-range-picker
+                v-show="false"
+                :opens="true"
                 v-model="dateRange"
                 @update="updateDate"
         >
@@ -32,14 +36,16 @@
             </template>
             <div>sdknsakdsankdsan</div>
         </date-range-picker>
-        <b-progress :max="max" class="mb-3 centerTh" >
+        <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
+        <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
+        <b-progress :max="max" class="mb-3 centerTh">
             <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
         </b-progress>
 
-
         <!--        <month-picker-input @change="saveDate" :range="true"></month-picker-input>-->
         <!--    <month-picker-input @change="saveToDate"></month-picker-input>-->
-        <b-button variant="outline-primary" @click="sendInjectRequest()">Inject</b-button>
+        <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()">Start</b-button>
+        <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()">Stop</b-button>
     </div>
 </template>
 
@@ -61,17 +67,21 @@
             msg: String
         },
         components: {
-            MonthPickerInput,DateRangePicker
+            MonthPickerInput, DateRangePicker
             // ProgressBar
         },
         data: function () {
             return {
+                isRunning: false,
+                callsInjected: undefined,
+                callsPerSecond: undefined,
                 dateRange: {
                     startDate: undefined,
                     endDate: undefined
                 },
                 form: {
-                    callsToInject: undefined                },
+                    callsToInject: undefined
+                },
                 types: [
                     'number'
                 ],
@@ -125,7 +135,7 @@
             }
         },
         methods: {
-            updateDate: function(date) {
+            updateDate: function (date) {
                 this.dateRange.startDate = date.startDate
                 this.dateRange.endDate = date.endDate
             },
@@ -134,8 +144,22 @@
                 //     rejectUnauthorized: false
                 // });
 
-                axios.post('http://localhost:9090/calls', this.date)
-                    .then(response => (console.log(response.data)))
+                axios.get('http://localhost:9090/start', this.date)
+                    .then(response => {
+                        console.log(response.data)
+                        if(response.status === 200){
+                            this.isRunning = true
+                        }
+                    })
+            },
+            sendStopRequest: function () {
+                axios.get('http://localhost:9090/stop', this.date)
+                    .then(response => {
+                        console.log(response.data)
+                        if(response.status === 200){
+                            this.isRunning = false
+                        }
+                    })
             },
             saveDate: function (date) {
                 this.date.rangeFromMonth = date.rangeFrom
@@ -178,6 +202,7 @@
                         const body = JSON.parse(message.body);
                         this.injectionProgress = body.injectionProgress
                         this.callsInjected = body.callsInjected
+                        this.callsPerSecond = body.callsPerSecond
                         this.remainingSeconds = body.remainingSeconds
                         // this.received_messages.push(JSON.parse(message.body).content);
                     });
@@ -215,13 +240,6 @@
     .centerTh1 {
         width: 50%;
         margin: 0 auto;
-    }
-
-    .month-pickerEnrich {
-        padding-top: 50px;
-        padding-right: 30px;
-        padding-bottom: 480px;
-        padding-left: 80px;
     }
 
     h3 {
