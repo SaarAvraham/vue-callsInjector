@@ -192,22 +192,27 @@
             //     console.log(event)
             //     console.log("Successfully connected to the echo websocket server...")
             // }
-            const socket = new SockJS("http://localhost:9090/updates");
-            this.stompClient = Stomp.over(socket);
-            this.stompClient.connect(
+
+                const socket = new SockJS("http://localhost:9090/updates");
+                this.stompClient = Stomp.over(socket);
+                const stompClientVar = this.stompClient
+
+                var sockJsConnectIntervalId = setInterval(function () {
+                    console.log('Trying to connect to the server');
+                    stompClientVar.connect(
                 {},
-                frame => {
-                    console.log(frame);
+                    frame => {
+                     console.log(frame);
+console.log('Connected to server, now will try to subscribe');
+                      const self = this;
 
-                    const self = this;
-
-                    this.stompClient.subscribe("/topic/messages", message => {
-                        console.log(message);
-                        console.log(message.body.injectionProgress);
-                        const body = JSON.parse(message.body);
-                        this.injectionProgress = body.injectionProgress
-                        this.callsInjected = body.callsInjected
-                        this.callsPerSecond = body.callsPerSecond
+                        stompClientVar.subscribe("/topic/messages", message => {
+                          console.log(message);
+                          console.log(message.body.injectionProgress);
+                          const body = JSON.parse(message.body);
+                           this.injectionProgress = body.injectionProgress
+                           this.callsInjected = body.callsInjected
+                           this.callsPerSecond = body.callsPerSecond
                         this.remainingSeconds = body.remainingSeconds
 
                         self.$nextTick(function() {
@@ -216,12 +221,15 @@
 
                         // this.received_messages.push(JSON.parse(message.body).content);
                     });
+
+                    clearInterval(sockJsConnectIntervalId)
                 },
-                error => {
-                    console.log(error);
-                    this.connected = false;
-                }
-            );
+                    error => {
+                        console.log(error);
+                        this.connected = false;
+                 }
+                );
+            }, 5000);
         }
         // disconnect() {
         //     if (this.stompClient) {
