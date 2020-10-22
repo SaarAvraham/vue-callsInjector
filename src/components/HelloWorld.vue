@@ -17,7 +17,7 @@
             >
                 <b-form-input
                         id="input-1"
-                        v-model="searchRequest.callsToInject"
+                        v-model="startRequest.callsToInject"
                         type="number"
                         required
                         placeholder="Enter the amount of calls to inject"
@@ -37,6 +37,7 @@
             </template>
             <div>sdknsakdsankdsan</div>
         </date-range-picker>
+        <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
         <b-progress :max="max" class="mb-3 centerTh">
@@ -45,8 +46,8 @@
 
         <!--        <month-picker-input @change="saveDate" :range="true"></month-picker-input>-->
         <!--    <month-picker-input @change="saveToDate"></month-picker-input>-->
-        <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()">Start</b-button>
-        <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()">Stop</b-button>
+        <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()" :disabled="isRunning">Start</b-button>
+        <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()" :disabled="!isRunning">Stop</b-button>
     </div>
 </template>
 
@@ -74,6 +75,7 @@
         },
         data: function () {
             return {
+                isTurboMode: false,
                 isRunning: false,
                 callsInjected: undefined,
                 callsPerSecond: undefined,
@@ -92,11 +94,12 @@
                 max: 100,
                 stompClient: undefined,
                 connected: false,
-                searchRequest: {
+                startRequest: {
                     callsToInject: undefined,
                     rangeFromMonth: null,
                     rangeToMonth: null,
-                    year: null
+                    year: null,
+                    isTurboMode: false
                 },
                 options: {
                     text: {
@@ -147,7 +150,8 @@
                 //     rejectUnauthorized: false
                 // });
 
-                axios.post('http://localhost:9090/start', this.searchRequest)
+                this.startRequest.isTurboMode = this.isTurboMode
+                axios.post('http://localhost:9090/start', this.startRequest)
                     .then(response => {
                         console.log(response.data)
                         if (response.status === 200) {
@@ -165,9 +169,9 @@
                     })
             },
             saveDate: function (date) {
-                this.searchRequest.rangeFromMonth = date.rangeFrom
-                this.searchRequest.rangeToMonth = date.rangeTo
-                this.searchRequest.year = date.year
+                this.startRequest.rangeFromMonth = date.rangeFrom
+                this.startRequest.rangeToMonth = date.rangeTo
+                this.startRequest.year = date.year
                 console.log('Current date is:')
                 console.log(this.date)
             }
