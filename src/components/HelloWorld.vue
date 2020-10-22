@@ -1,7 +1,7 @@
 <template>
     <div class="hello">
         <h1 class="marDown"> {{ msg }}</h1>
-        <status-indicator v-if="connected" status="positive"/>
+        <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative" />
         <!--        <div class="centerTh">-->
         <!--            <progress-bar-->
