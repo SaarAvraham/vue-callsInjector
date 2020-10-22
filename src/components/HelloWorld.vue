@@ -2,7 +2,7 @@
     <div class="hello">
         <h1 class="marDown"> {{ msg }}</h1>
         <status-indicator v-if="connected" status="positive" pulse="true"/>
-        <status-indicator v-else status="negative" />
+        <status-indicator v-else status="negative"/>
         <!--        <div class="centerTh">-->
         <!--            <progress-bar-->
         <!--                    :options="options"-->
@@ -55,7 +55,7 @@
     import axios from 'axios'
     // import ProgressBar from 'vuejs-progress-bar'
     // import * as https from "https";
-    import { StatusIndicator } from 'vue-status-indicator';
+    import {StatusIndicator} from 'vue-status-indicator';
     import DateRangePicker from 'vue2-daterange-picker'
     import SockJS from "sockjs-client"
     import Stomp from "webstomp-client"
@@ -150,7 +150,7 @@
                 axios.post('http://localhost:9090/start', this.searchRequest)
                     .then(response => {
                         console.log(response.data)
-                        if(response.status === 200){
+                        if (response.status === 200) {
                             this.isRunning = true
                         }
                     })
@@ -159,7 +159,7 @@
                 axios.delete('http://localhost:9090/stop')
                     .then(response => {
                         console.log(response.data)
-                        if(response.status === 200){
+                        if (response.status === 200) {
                             this.isRunning = false
                         }
                     })
@@ -193,44 +193,90 @@
             //     console.log("Successfully connected to the echo websocket server...")
             // }
 
+
+
+            const stompConnectFunc = function stompConnect() {
+                console.log('Trying to connect to the server');
                 const socket = new SockJS("http://localhost:9090/updates");
                 this.stompClient = Stomp.over(socket);
-                const stompClientVar = this.stompClient
 
-                var sockJsConnectIntervalId = setInterval(function () {
-                    console.log('Trying to connect to the server');
-                    stompClientVar.connect(
-                {},
+                this.stompClient.connect(
+                    {},
                     frame => {
-                     console.log(frame);
-console.log('Connected to server, now will try to subscribe');
-                      const self = this;
+                        try {
+                            console.log(frame);
+                            console.log('Connected to server, now will try to subscribe');
+                            const self = this;
 
-                        stompClientVar.subscribe("/topic/messages", message => {
-                          console.log(message);
-                          console.log(message.body.injectionProgress);
-                          const body = JSON.parse(message.body);
-                           this.injectionProgress = body.injectionProgress
-                           this.callsInjected = body.callsInjected
-                           this.callsPerSecond = body.callsPerSecond
-                        this.remainingSeconds = body.remainingSeconds
+                            this.stompClient.subscribe("/topic/messages", message => {
+                                console.log(message);
+                                console.log(message.body.injectionProgress);
+                                const body = JSON.parse(message.body);
+                                this.injectionProgress = body.injectionProgress
+                                this.callsInjected = body.callsInjected
+                                this.callsPerSecond = body.callsPerSecond
+                                this.remainingSeconds = body.remainingSeconds
 
-                        self.$nextTick(function() {
-                            self.connected = true
-                        })
+                                self.$nextTick(function () {
+                                    self.connected = true
+                                })
 
-                        // this.received_messages.push(JSON.parse(message.body).content);
-                    });
-
-                    clearInterval(sockJsConnectIntervalId)
-                },
+                                // this.received_messages.push(JSON.parse(message.body).content);
+                            });
+                        } catch (e) {
+                            console.log(e.message)
+                            throw e
+                        }
+                    },
                     error => {
                         console.log(error);
                         this.connected = false;
-                 }
+                        setTimeout(stompConnectFunc, 5000);
+                    }
                 );
-            }, 5000);
+            }.bind(this)
+
+            stompConnectFunc()
         }
+
+        //     var sockJsConnectIntervalId = setInterval(function () {
+        //         console.log('Trying to connect to the server');
+        //         this.stompClient.connect(
+        //             {},
+        //             frame => {
+        //                 try {
+        //                     console.log(frame);
+        //                     console.log('Connected to server, now will try to subscribe');
+        //                     const self = this;
+        //
+        //                     this.stompClient.subscribe("/topic/messages", message => {
+        //                         console.log(message);
+        //                         console.log(message.body.injectionProgress);
+        //                         const body = JSON.parse(message.body);
+        //                         this.injectionProgress = body.injectionProgress
+        //                         this.callsInjected = body.callsInjected
+        //                         this.callsPerSecond = body.callsPerSecond
+        //                         this.remainingSeconds = body.remainingSeconds
+        //
+        //                         self.$nextTick(function () {
+        //                             self.connected = true
+        //                         })
+        //
+        //                         // this.received_messages.push(JSON.parse(message.body).content);
+        //                     });
+        //
+        //                     clearInterval(sockJsConnectIntervalId)
+        //                 } catch (e) {
+        //                     console.log(e.message)
+        //                 }
+        //             },
+        //             error => {
+        //                 console.log(error);
+        //                 this.connected = false;
+        //             }
+        //         );
+        //     }.bind(this), 50000);
+        // }
         // disconnect() {
         //     if (this.stompClient) {
         //         this.stompClient.disconnect();
