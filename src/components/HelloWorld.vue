@@ -1,5 +1,5 @@
 <template>
-    <div class="hello">
+    <div>
         <h1 class="marDown"> {{ msg }}</h1>
         <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative"/>
@@ -19,43 +19,65 @@
                 ></b-form-input>
             </b-form-group>
         </b-form>
-        <month-picker-input class="centerTh1" @change="saveDate" :range="true" v-show="true"
-        ></month-picker-input>
-        <date-range-picker
-                v-show="false"
-                v-model="dateRange"
-                @update="updateDate"
-        >
-            <template v-slot:input="picker" style="min-width: 350px;">
-                {{ picker.startDate}} - {{ picker.endDate}}
-            </template>
-            <div>sdknsakdsankdsan</div>
-        </date-range-picker>
+<!--        <month-picker-input class="centerTh1" @change="saveDate" :range="true" v-show="false"-->
+<!--        ></month-picker-input>-->
+        <div class="py-5">
+            <div class="form-group">
+                <label>Select range:  </label>
+                <date-range-picker
+                        ref="picker"
+                        :opens="opens"
+                        :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd HH:MM:ss' }"
+                        :minDate="minDate" :maxDate="maxDate"
+                        :singleDatePicker="singleDatePicker"
+                        :timePicker="timePicker"
+                        :timePicker24Hour="timePicker24Hour"
+                        :showWeekNumbers="showWeekNumbers"
+                        :showDropdowns="showDropdowns"
+                        :autoApply="autoApply"
+                        v-model="dateRange"
+                        :ranges="show_ranges ? undefined : false"
+                        @update="updateValues"
+                        @toggle="checkOpen"
+                        :linkedCalendars="linkedCalendars"
+                        :dateFormat="dateFormat"
+                        :always-show-calendars="false"
+                        :alwaysShowCalendars="alwaysShowCalendars"
+                        :append-to-body="appendToBody"
+                        :closeOnEsc="closeOnEsc"
+                >
+                    <template #input="picker" style="min-width: 350px;">
+                        {{ picker.startDate | date }} - {{ picker.endDate | date }}
+                    </template>
+                </date-range-picker>
+
+                <button class="btn btn-info" @click="dateRange.startDate = null, dateRange.endDate = null">
+                    Clear
+                </button>
+            </div>
+        </div>
+
         <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
-        <b-progress :max="max" class="mb-3 centerTh">
+        <b-progress  :max="max" style="width: 70%; alignment: center" class="mb-3 centerTh">
             <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
         </b-progress>
-
-        <!--        <month-picker-input @change="saveDate" :range="true"></month-picker-input>-->
-        <!--    <month-picker-input @change="saveToDate"></month-picker-input>-->
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()" :disabled="isRunning">Start</b-button>
         <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()" :disabled="!isRunning">Stop</b-button>
     </div>
 </template>
 
 <script>
-    import {MonthPickerInput} from 'vue-month-picker'
+    // import {MonthPickerInput} from 'vue-month-picker'
     import axios from 'axios'
-    // import ProgressBar from 'vuejs-progress-bar'
-    // import * as https from "https";
     import {StatusIndicator} from 'vue-status-indicator';
     import DateRangePicker from 'vue2-daterange-picker'
     import SockJS from "sockjs-client"
     import Stomp from "webstomp-client"
     import 'bootstrap/dist/css/bootstrap.css'
-    import 'bootstrap-vue/dist/bootstrap-vue.css'
+    // import 'bootstrap-vue/dist/bootstrap-vue.css'
+    import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 
 
     export default {
@@ -64,11 +86,29 @@
             msg: String
         },
         components: {
-            MonthPickerInput, DateRangePicker, StatusIndicator
+            DateRangePicker, StatusIndicator
             // ProgressBar
         },
         data: function () {
             return {
+
+                opens: 'center',
+                minDate: '2019-05-02 04:00:00',
+                maxDate: '2020-12-26 14:00:00',
+                single_range_picker: false,
+                show_ranges: true,
+                singleDatePicker: false,
+                timePicker: false,
+                timePicker24Hour: false,
+                showDropdowns: true,
+                autoApply: false,
+                showWeekNumbers: false,
+                linkedCalendars: false,
+                alwaysShowCalendars: true,
+                appendToBody: false,
+                closeOnEsc: true,
+
+
                 isTurboMode: false,
                 isRunning: false,
                 callsInjected: undefined,
@@ -162,13 +202,13 @@
                         }
                     })
             },
-            saveDate: function (date) {
-                this.startRequest.rangeFromMonth = date.rangeFrom
-                this.startRequest.rangeToMonth = date.rangeTo
-                this.startRequest.year = date.year
-                console.log('Current date is:')
-                console.log(this.date)
-            }
+            // saveDate: function (date) {
+            //     this.startRequest.rangeFromMonth = date.rangeFrom
+            //     this.startRequest.rangeToMonth = date.rangeTo
+            //     this.startRequest.year = date.year
+            //     console.log('Current date is:')
+            //     console.log(this.date)
+            // }
         },
         created: function () {
 
@@ -234,21 +274,4 @@
         margin: 0 auto;
     }
 
-    h3 {
-        margin: 40px 0 0;
-    }
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    li {
-        display: inline-block;
-        margin: 0 10px;
-    }
-
-    a {
-        color: #42b983;
-    }
 </style>
