@@ -1,70 +1,147 @@
 <template>
     <div>
         <h1 class="marDown"> {{ msg }}</h1>
+
+<!--        <div class="aParent">-->
+<!--            <div>-->
+<!--                <status-indicator v-if="connected" status="positive" pulse="true"/>-->
+<!--                <status-indicator v-else status="negative"/>-->
+<!--            </div>-->
+
+<!--            <div>-->
+<!--                <label style="padding-left: 5px;">Connected</label>-->
+<!--            </div>-->
+<!--        </div>-->
+
         <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative"/>
-        <b-form>
-            <b-form-group
-                    id="input-group-1"
-                    label="Number of calls:"
-                    label-for="input-1"
-            >
-                <b-form-input
-                        id="input-1"
-                        v-model="startRequest.callsToInject"
-                        type="number"
-                        required
-                        placeholder="Enter the amount of calls to inject"
-                        style="width: auto; justify-content: center; display: flex; margin:auto; "
-                ></b-form-input>
-            </b-form-group>
-        </b-form>
-<!--        <month-picker-input class="centerTh1" @change="saveDate" :range="true" v-show="false"-->
-<!--        ></month-picker-input>-->
-        <div class="py-5">
-            <div class="form-group">
-                <label>Select range:  </label>
-                <date-range-picker
-                        ref="picker"
-                        :opens="opens"
-                        :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd HH:MM:ss' }"
-                        :minDate="minDate" :maxDate="maxDate"
-                        :singleDatePicker="singleDatePicker"
-                        :timePicker="timePicker"
-                        :timePicker24Hour="timePicker24Hour"
-                        :showWeekNumbers="showWeekNumbers"
-                        :showDropdowns="showDropdowns"
-                        :autoApply="autoApply"
-                        v-model="dateRange"
-                        :ranges="show_ranges ? undefined : false"
-                        @update="updateValues"
-                        @toggle="checkOpen"
-                        :linkedCalendars="linkedCalendars"
-                        :dateFormat="dateFormat"
-                        :always-show-calendars="false"
-                        :alwaysShowCalendars="alwaysShowCalendars"
-                        :append-to-body="appendToBody"
-                        :closeOnEsc="closeOnEsc"
-                >
-                    <template #input="picker" style="min-width: 350px;">
-                        {{ picker.startDate | date }} - {{ picker.endDate | date }}
-                    </template>
-                </date-range-picker>
+        <label v-if="connected" style="padding-left: 10px; padding-bottom: 5px">Connected</label>
+        <label v-else style="padding-left: 10px; padding-bottom: 5px;"> Disconnected</label>
 
-                <button class="btn btn-info" @click="dateRange.startDate = null, dateRange.endDate = null">
-                    Clear
-                </button>
-            </div>
+
+        <div>
+            <b-form-group
+                    label-cols-lg="3"
+                    label-size="lg"
+                    label-class="font-weight-bold pt-0"
+                    class="mb-0"
+            >
+                <b-form-group
+                        label-cols-sm="3"
+                        label="Number of Calls:"
+                        label-align-sm="right"
+                        label-for="nested-street"
+                >
+                    <b-form-input id="nested-street" type="number" style="width: auto"
+                                  v-model="startRequest.callsToInject"
+                                  required
+                    ></b-form-input>
+                </b-form-group>
+
+                <b-form-group
+                        label-cols-sm="3"
+                        label="Select Date Range:"
+                        label-align-sm="right"
+                        label-for="nested-country"
+                >
+                    <date-range-picker
+                            ref="picker"
+                            :opens="opens"
+                            :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd' }"
+                            :minDate="minDate" :maxDate="maxDate"
+                            :singleDatePicker="singleDatePicker"
+                            :timePicker="timePicker"
+                            :timePicker24Hour="timePicker24Hour"
+                            :showWeekNumbers="showWeekNumbers"
+                            :showDropdowns="showDropdowns"
+                            :autoApply="autoApply"
+                            v-model="dateRange"
+                            :ranges="show_ranges ? undefined : false"
+                            @update="updateValues"
+                            @toggle="checkOpen"
+                            :linkedCalendars="linkedCalendars"
+                            :dateFormat="dateFormat"
+                            :always-show-calendars="false"
+                            :alwaysShowCalendars="alwaysShowCalendars"
+                            :append-to-body="appendToBody"
+                            :closeOnEsc="closeOnEsc"
+                    >
+                        <template #input="picker" style="min-width: 350px">
+                            {{ picker.startDate | date }} - {{ picker.endDate | date }}
+                        </template>
+                    </date-range-picker>
+                </b-form-group>
+            </b-form-group>
         </div>
+
+<!--        <b-form>-->
+<!--            <b-form-group-->
+<!--                    id="input-group-1"-->
+<!--                    label="Number of calls:"-->
+<!--                    label-for="input-1"-->
+<!--                    label-cols-xl="10"-->
+<!--                    label-align="center"-->
+<!--            >-->
+<!--                <b-form-input-->
+<!--                        id="input-1"-->
+<!--                        v-model="startRequest.callsToInject"-->
+<!--                        type="number"-->
+<!--                        required-->
+<!--                        placeholder="Enter the amount of calls to inject"-->
+<!--                        style="width: auto; margin:auto;"-->
+<!--                ></b-form-input>-->
+<!--            </b-form-group>-->
+<!--        </b-form>-->
+
+<!--        <div class="py-5">-->
+<!--            <div class="form-group">-->
+<!--                <label>Select range: </label>-->
+<!--                <date-range-picker-->
+<!--                        ref="picker"-->
+<!--                        :opens="opens"-->
+<!--                        :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd' }"-->
+<!--                        :minDate="minDate" :maxDate="maxDate"-->
+<!--                        :singleDatePicker="singleDatePicker"-->
+<!--                        :timePicker="timePicker"-->
+<!--                        :timePicker24Hour="timePicker24Hour"-->
+<!--                        :showWeekNumbers="showWeekNumbers"-->
+<!--                        :showDropdowns="showDropdowns"-->
+<!--                        :autoApply="autoApply"-->
+<!--                        v-model="dateRange"-->
+<!--                        :ranges="show_ranges ? undefined : false"-->
+<!--                        @update="updateValues"-->
+<!--                        @toggle="checkOpen"-->
+<!--                        :linkedCalendars="linkedCalendars"-->
+<!--                        :dateFormat="dateFormat"-->
+<!--                        :always-show-calendars="false"-->
+<!--                        :alwaysShowCalendars="alwaysShowCalendars"-->
+<!--                        :append-to-body="appendToBody"-->
+<!--                        :closeOnEsc="closeOnEsc"-->
+<!--                >-->
+<!--                    <template #input="picker" style="min-width: 350px;">-->
+<!--                        {{ picker.startDate | date }} - {{ picker.endDate | date }}-->
+<!--                    </template>-->
+<!--                </date-range-picker>-->
+
+<!--                <button class="btn btn-info" @click="dateRange.startDate = null, dateRange.endDate = null">-->
+<!--                    Clear-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </div>-->
 
         <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
-        <b-progress  :max="max" style="width: 70%; alignment: center" class="mb-3 centerTh">
+        <b-progress :max="max" style="width: 70%; alignment: center; margin-left: auto; margin-right: auto"
+                    class="mb-3 centerTh">
             <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
         </b-progress>
-        <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()" :disabled="isRunning">Start</b-button>
-        <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()" :disabled="!isRunning">Stop</b-button>
+        <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
+                  :disabled="isRunning || !connected">Start
+        </b-button>
+        <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()"
+                  :disabled="!isRunning || !connected">Stop
+        </b-button>
     </div>
 </template>
 
@@ -89,9 +166,16 @@
             DateRangePicker, StatusIndicator
             // ProgressBar
         },
+        filters: {
+            date(value) {
+                if (!value)
+                    return ''
+                let options = {year: 'numeric', month: 'long', day: 'numeric'};
+                return Intl.DateTimeFormat('en-US', options).format(value)
+            }
+        },
         data: function () {
             return {
-
                 opens: 'center',
                 minDate: '2019-05-02 04:00:00',
                 maxDate: '2020-12-26 14:00:00',
@@ -135,31 +219,6 @@
                     year: null,
                     isTurboMode: false
                 },
-                options: {
-                    text: {
-                        color: '#FFFFFF',
-                        shadowEnable: true,
-                        shadowColor: '#000000',
-                        fontSize: 14,
-                        fontFamily: 'Helvetica',
-                        dynamicPosition: false,
-                        hideText: false
-                    },
-                    progress: {
-                        color: '#2dbd2d',
-                        backgroundColor: '#333333'
-                    },
-                    layout: {
-                        height: 35,
-                        width: 640,
-                        verticalTextAlign: 61,
-                        horizontalTextAlign: 43,
-                        zeroOffset: 0,
-                        strokeWidth: 30,
-                        progressPadding: 0,
-                        type: 'line'
-                    }
-                }
                 // fromDate: {
                 //     from: null,
                 //     to: null,
@@ -233,10 +292,14 @@
                                 this.callsInjected = body.callsInjected
                                 this.callsPerSecond = body.callsPerSecond
                                 this.remainingSeconds = body.remainingSeconds
+                                this.isRunning = body.running
+                                this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
 
                                 self.$nextTick(function () {
                                     self.connected = true
+                                    self.isRunning = body.running
                                 })
+
 
                                 // this.received_messages.push(JSON.parse(message.body).content);
                             });
@@ -265,13 +328,18 @@
     }
 
     .centerTh {
-        margin-top: 280px;
+        margin-top: 180px;
 
     }
 
     .centerTh1 {
         width: 50%;
         margin: 0 auto;
+    }
+
+    .aParent div {
+        float: left;
+        clear: none;
     }
 
 </style>

@@ -1,16 +1,20 @@
 <template>
   <div id="app">
-    <HelloWorld msg="Data Lake Injector"/>
+      <vue-headful
+              title="Data Lake Calls Injector"
+      />
+      <HelloWorld msg="Data Lake Calls Injector"/>
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
+import vueHeadful from 'vue-headful';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld, vueHeadful
   }
 }
 </script>
