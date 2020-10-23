@@ -3,12 +3,6 @@
         <h1 class="marDown"> {{ msg }}</h1>
         <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative"/>
-        <!--        <div class="centerTh">-->
-        <!--            <progress-bar-->
-        <!--                    :options="options"-->
-        <!--                    :value="injectionProgress"-->
-        <!--            />-->
-        <!--        </div>-->
         <b-form>
             <b-form-group
                     id="input-group-1"
@@ -175,29 +169,8 @@
                 console.log('Current date is:')
                 console.log(this.date)
             }
-            // saveFromDate: function (date) {
-            //   console.log(date)
-            //   this.fromDate = date
-            // },
-            // saveToDate: function (date) {
-            //   console.log(date)
-            //   this.toDate = date
-            // }
         },
         created: function () {
-            // console.log("Starting connection to WebSocket Server")
-            // this.connection = new WebSocket('ws://localhost:9090/chat')
-            //
-            // this.connection.onmessage = function (event) {
-            //     console.log(event);
-            // }
-            //
-            // this.connection.onopen = function (event) {
-            //     console.log(event)
-            //     console.log("Successfully connected to the echo websocket server...")
-            // }
-
-
 
             const stompConnectFunc = function stompConnect() {
                 console.log('Trying to connect to the server');
@@ -235,62 +208,13 @@
                     error => {
                         console.log(error);
                         this.connected = false;
-                        setTimeout(stompConnectFunc, 5000);
+                        setTimeout(stompConnectFunc, 1000);
                     }
                 );
             }.bind(this)
 
             stompConnectFunc()
         }
-
-        //     var sockJsConnectIntervalId = setInterval(function () {
-        //         console.log('Trying to connect to the server');
-        //         this.stompClient.connect(
-        //             {},
-        //             frame => {
-        //                 try {
-        //                     console.log(frame);
-        //                     console.log('Connected to server, now will try to subscribe');
-        //                     const self = this;
-        //
-        //                     this.stompClient.subscribe("/topic/messages", message => {
-        //                         console.log(message);
-        //                         console.log(message.body.injectionProgress);
-        //                         const body = JSON.parse(message.body);
-        //                         this.injectionProgress = body.injectionProgress
-        //                         this.callsInjected = body.callsInjected
-        //                         this.callsPerSecond = body.callsPerSecond
-        //                         this.remainingSeconds = body.remainingSeconds
-        //
-        //                         self.$nextTick(function () {
-        //                             self.connected = true
-        //                         })
-        //
-        //                         // this.received_messages.push(JSON.parse(message.body).content);
-        //                     });
-        //
-        //                     clearInterval(sockJsConnectIntervalId)
-        //                 } catch (e) {
-        //                     console.log(e.message)
-        //                 }
-        //             },
-        //             error => {
-        //                 console.log(error);
-        //                 this.connected = false;
-        //             }
-        //         );
-        //     }.bind(this), 50000);
-        // }
-        // disconnect() {
-        //     if (this.stompClient) {
-        //         this.stompClient.disconnect();
-        //     }
-        //     this.connected = false;
-        // },
-        // tickleConnection() {
-        //     this.connected ? this.disconnect() : this.connect();
-        // }
-        // }
     }
 </script>
 
