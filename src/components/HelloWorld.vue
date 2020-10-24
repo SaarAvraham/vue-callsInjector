@@ -34,7 +34,7 @@
                         label-for="nested-country"
                 >
                     <b-row
-                    style="padding-left: 15px">
+                            style="padding-left: 15px">
                         <date-range-picker
                                 class="b-form-tag"
                                 style="width: 320px; text-align: left"
@@ -48,12 +48,9 @@
                                 :showWeekNumbers="showWeekNumbers"
                                 :showDropdowns="showDropdowns"
                                 :autoApply="autoApply"
-                                v-model="dateRange"
+                                v-model="startRequest.dateRange"
                                 :ranges="show_ranges ? undefined : false"
-                                @update="updateValues"
-                                @toggle="checkOpen"
                                 :linkedCalendars="linkedCalendars"
-                                :dateFormat="dateFormat"
                                 :always-show-calendars="false"
                                 :alwaysShowCalendars="alwaysShowCalendars"
                                 :append-to-body="appendToBody"
@@ -113,7 +110,7 @@
             }
         },
         watch: {
-            callsToInject: function(newValue) {
+            callsToInject: function (newValue) {
                 const result = newValue.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                 this.$nextTick(() => {
@@ -123,6 +120,8 @@
         },
         data: function () {
             return {
+                retryTimeout: undefined,
+
                 opens: 'center',
                 minDate: '2019-05-02 04:00:00',
                 maxDate: '2020-12-26 14:00:00',
@@ -144,10 +143,10 @@
                 isRunning: false,
                 callsInjected: undefined,
                 callsPerSecond: undefined,
-                dateRange: {
-                    startDate: undefined,
-                    endDate: undefined
-                },
+                // dateRange: {
+                //     startDate: undefined,
+                //     endDate: undefined
+                // },
                 form: {
                     callsToInject: undefined
                 },
@@ -161,11 +160,12 @@
                 connected: false,
                 startRequest: {
                     callsToInject: undefined,
-                    rangeFromMonth: null,
-                    rangeToMonth: null,
-                    year: null,
+                    dateRange: {
+                        endDate: undefined,
+                        startDate: undefined
+                    },
                     isTurboMode: false
-                },
+                }
             }
         },
         methods: {
@@ -176,7 +176,10 @@
             sendInjectRequest: function () {
                 this.startRequest.isTurboMode = this.isTurboMode
                 this.startRequest.callsToInject = this.callsToInject
-                axios.post('http://localhost:9090/start', this.startRequest)
+                let requestClone = JSON.parse(JSON.stringify(this.startRequest));
+                requestClone.callsToInject = requestClone.callsToInject.toString().replaceAll(',', '')
+                console.log(requestClone)
+                axios.post('http://localhost:9090/start', requestClone)
                     .then(response => {
                         console.log(response.data)
                         if (response.status === 200) {
@@ -203,6 +206,11 @@
         },
         created: function () {
             const stompConnectFunc = function stompConnect() {
+
+                if (this.stompClient !== undefined && this.stompClient.isConnected) {
+                    this.stompClient.disconnect()
+                }
+
                 console.log('Trying to connect to the server');
                 const socket = new SockJS("http://localhost:9090/updates");
                 this.stompClient = Stomp.over(socket);
@@ -210,39 +218,38 @@
                 this.stompClient.connect(
                     {},
                     frame => {
-                        try {
-                            console.log(frame);
-                            console.log('Connected to server, now will try to subscribe');
-                            const self = this;
+                        console.log(frame);
+                        console.log('Connected to server, now will try to subscribe');
+                        const self = this;
 
-                            this.stompClient.subscribe("/topic/messages", message => {
-                                console.log(message);
-                                console.log(message.body.injectionProgress);
-                                const body = JSON.parse(message.body);
-                                this.injectionProgress = body.injectionProgress
-                                this.callsInjected = body.callsInjected
-                                this.callsPerSecond = body.callsPerSecond
-                                this.remainingSeconds = body.remainingSeconds
-                                this.isRunning = body.running
-                                this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
+                        this.stompClient.subscribe("/topic/messages", message => {
+                            console.log(message);
+                            console.log(message.body.injectionProgress);
+                            const body = JSON.parse(message.body);
+                            this.injectionProgress = body.injectionProgress
+                            this.callsInjected = body.callsInjected
+                            this.callsPerSecond = body.callsPerSecond
+                            this.remainingSeconds = body.remainingSeconds
+                            this.isRunning = body.running
+                            this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
 
-                                self.$nextTick(function () {
-                                    self.connected = true
-                                    self.isRunning = body.running
-                                })
+                            self.$nextTick(function () {
+                                self.connected = true
+                                self.isRunning = body.running
+                            })
 
+                            // this.received_messages.push(JSON.parse(message.body).content);
+                        });
 
-                                // this.received_messages.push(JSON.parse(message.body).content);
-                            });
-                        } catch (e) {
-                            console.log(e.message)
-                            throw e
+                        while (this.retryTimeout--) {
+                            window.clearTimeout(this.retryTimeout); // will do nothing if no timeout with id is present
                         }
                     },
                     error => {
                         console.log(error);
                         this.connected = false;
-                        setTimeout(stompConnectFunc, 1000);
+                        console.log('Setting timeout');
+                        this.retryTimeout = setTimeout(stompConnectFunc, 1000);
                     }
                 );
             }.bind(this)
