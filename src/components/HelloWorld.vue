@@ -78,7 +78,7 @@
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
         <div v-show="isRunning">
-            All calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate.replace("T", " ").substring(0, queryableInEgressAfterDate.indexOf("."))}}</div>
+            All calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div>
         <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
             <b-progress :max="max"
             class="mb-3 centerTh">
@@ -145,6 +145,8 @@
                 appendToBody: false,
                 closeOnEsc: true,
                 callsToInject: undefined,
+
+                queryableInEgressAfterDate: undefined,
 
                 isTurboMode: false,
                 isRunning: false,
@@ -237,7 +239,9 @@
                             this.callsInjected = body.callsInjected.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.callsPerSecond = body.callsPerSecond.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.remainingSeconds = body.remainingSeconds
-                            this.queryableInEgressAfterDate = body.queryableInEgressAfterDate
+                            if(body.queryableInEgressAfterDate !== null && body.queryableInEgressAfterDate !== undefined){
+                                this.queryableInEgressAfterDate = body.queryableInEgressAfterDate.replace("T", " ").substring(0, body.queryableInEgressAfterDate.indexOf("."))
+                            }
                             this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
                             const totalCalls = body.totalCallsToInject === 0 ? undefined:body.totalCallsToInject.toString().replace(",", "")
 
