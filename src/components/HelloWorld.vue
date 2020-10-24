@@ -20,7 +20,7 @@
                         label-align-sm="right"
                         label-for="nested-street"
                 >
-                    <b-form-input id="nested-street" style="width: 320px; text-align: left"
+                    <b-form-input id="nested-street" style="width: 332px; text-align: left"
                                   v-model="callsToInject"
                                   required
                     ></b-form-input>
@@ -37,7 +37,7 @@
                             style="padding-left: 15px">
                         <date-range-picker
                                 class="b-form-tag"
-                                style="width: 320px; text-align: left"
+                                style="width: 332px; text-align: left"
                                 ref="picker"
                                 :opens="opens"
                                 :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd' }"
@@ -69,10 +69,13 @@
         <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
-        <b-progress :max="max" style="width: 70%; alignment: center; margin-left: auto; margin-right: auto"
-                    class="mb-3 centerTh">
-            <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
-        </b-progress>
+        <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
+            <b-progress :max="max"
+                        class="mb-3 centerTh">
+                <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
+            </b-progress>
+        </div>
+
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
         </b-button>
