@@ -2,8 +2,8 @@
     <div>
         <h1 class="marDown"> {{ msg }}</h1>
 
-        <status-indicator v-if="connected" status="positive" pulse="true"/>
-        <status-indicator v-else status="negative"/>
+        <status-indicator v-if="connected" status="positive" pulse="true" style="pointer-events: none"/>
+        <status-indicator v-else status="negative" style="pointer-events: none"/>
         <label v-if="connected" style="padding-left: 10px; padding-right: 1px; padding-bottom: 5px">Connected</label>
         <label v-else style="padding-left: 10px; padding-right: 1px; padding-bottom: 5px;"> Disconnected</label>
 
