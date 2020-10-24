@@ -2,17 +2,6 @@
     <div>
         <h1 class="marDown"> {{ msg }}</h1>
 
-        <!--        <div class="aParent">-->
-        <!--            <div>-->
-        <!--                <status-indicator v-if="connected" status="positive" pulse="true"/>-->
-        <!--                <status-indicator v-else status="negative"/>-->
-        <!--            </div>-->
-
-        <!--            <div>-->
-        <!--                <label style="padding-left: 5px;">Connected</label>-->
-        <!--            </div>-->
-        <!--        </div>-->
-
         <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative"/>
         <label v-if="connected" style="padding-left: 10px; padding-right: 1px; padding-bottom: 5px">Connected</label>
@@ -44,14 +33,8 @@
                         label-align-sm="right"
                         label-for="nested-country"
                 >
-                    <!--                    <b-form-input style="width: auto; visibility: hidden"-->
-                    <!--                                  required-->
-                    <!--                    >-->
-
-
                     <b-row
-                    style="padding-left: 15px"
-                    >
+                    style="padding-left: 15px">
                         <date-range-picker
                                 class="b-form-tag"
                                 style="width: 320px; text-align: left"
@@ -86,61 +69,6 @@
             </b-form-group>
         </div>
 
-        <!--        <b-form>-->
-        <!--            <b-form-group-->
-        <!--                    id="input-group-1"-->
-        <!--                    label="Number of calls:"-->
-        <!--                    label-for="input-1"-->
-        <!--                    label-cols-xl="10"-->
-        <!--                    label-align="center"-->
-        <!--            >-->
-        <!--                <b-form-input-->
-        <!--                        id="input-1"-->
-        <!--                        v-model="startRequest.callsToInject"-->
-        <!--                        type="number"-->
-        <!--                        required-->
-        <!--                        placeholder="Enter the amount of calls to inject"-->
-        <!--                        style="width: auto; margin:auto;"-->
-        <!--                ></b-form-input>-->
-        <!--            </b-form-group>-->
-        <!--        </b-form>-->
-
-        <!--        <div class="py-5">-->
-        <!--            <div class="form-group">-->
-        <!--                <label>Select range: </label>-->
-        <!--                <date-range-picker-->
-        <!--                        ref="picker"-->
-        <!--                        :opens="opens"-->
-        <!--                        :locale-data="{ firstDay: 1, format: 'yyyy-mm-dd' }"-->
-        <!--                        :minDate="minDate" :maxDate="maxDate"-->
-        <!--                        :singleDatePicker="singleDatePicker"-->
-        <!--                        :timePicker="timePicker"-->
-        <!--                        :timePicker24Hour="timePicker24Hour"-->
-        <!--                        :showWeekNumbers="showWeekNumbers"-->
-        <!--                        :showDropdowns="showDropdowns"-->
-        <!--                        :autoApply="autoApply"-->
-        <!--                        v-model="dateRange"-->
-        <!--                        :ranges="show_ranges ? undefined : false"-->
-        <!--                        @update="updateValues"-->
-        <!--                        @toggle="checkOpen"-->
-        <!--                        :linkedCalendars="linkedCalendars"-->
-        <!--                        :dateFormat="dateFormat"-->
-        <!--                        :always-show-calendars="false"-->
-        <!--                        :alwaysShowCalendars="alwaysShowCalendars"-->
-        <!--                        :append-to-body="appendToBody"-->
-        <!--                        :closeOnEsc="closeOnEsc"-->
-        <!--                >-->
-        <!--                    <template #input="picker" style="min-width: 350px;">-->
-        <!--                        {{ picker.startDate | date }} - {{ picker.endDate | date }}-->
-        <!--                    </template>-->
-        <!--                </date-range-picker>-->
-
-        <!--                <button class="btn btn-info" @click="dateRange.startDate = null, dateRange.endDate = null">-->
-        <!--                    Clear-->
-        <!--                </button>-->
-        <!--            </div>-->
-        <!--        </div>-->
-
         <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
         <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
         <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
@@ -158,7 +86,6 @@
 </template>
 
 <script>
-    // import {MonthPickerInput} from 'vue-month-picker'
     import axios from 'axios'
     import {StatusIndicator} from 'vue-status-indicator';
     import DateRangePicker from 'vue2-daterange-picker'
@@ -176,7 +103,6 @@
         },
         components: {
             DateRangePicker, StatusIndicator
-            // ProgressBar
         },
         filters: {
             date(value) {
@@ -240,18 +166,6 @@
                     year: null,
                     isTurboMode: false
                 },
-                // fromDate: {
-                //     from: null,
-                //     to: null,
-                //     month: null,
-                //     year: null
-                // },
-                // toDate: {
-                //     from: null,
-                //     to: null,
-                //     month: null,
-                //     year: null
-                // }
             }
         },
         methods: {
@@ -260,10 +174,6 @@
                 this.dateRange.endDate = date.endDate
             },
             sendInjectRequest: function () {
-                // const agent = https.Agent({
-                //     rejectUnauthorized: false
-                // });
-
                 this.startRequest.isTurboMode = this.isTurboMode
                 this.startRequest.callsToInject = this.callsToInject
                 axios.post('http://localhost:9090/start', this.startRequest)
@@ -292,7 +202,6 @@
             // }
         },
         created: function () {
-
             const stompConnectFunc = function stompConnect() {
                 console.log('Trying to connect to the server');
                 const socket = new SockJS("http://localhost:9090/updates");
@@ -343,7 +252,6 @@
     }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
     .marDown {
         margin-bottom: 70px;
