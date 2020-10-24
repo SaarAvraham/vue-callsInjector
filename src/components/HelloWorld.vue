@@ -23,6 +23,7 @@
                     <b-form-input id="nested-street" style="width: 332px; text-align: left"
                                   v-model="callsToInject"
                                   required
+                                  :disabled="isRunning"
                     ></b-form-input>
                 </b-form-group>
 
@@ -55,6 +56,7 @@
                                 :alwaysShowCalendars="alwaysShowCalendars"
                                 :append-to-body="appendToBody"
                                 :closeOnEsc="closeOnEsc"
+                                :disabled="isRunning"
                         >
                             <template #input="picker" style="min-width: 350px">
                                 {{ picker.startDate | date }} - {{ picker.endDate | date }}
@@ -67,21 +69,23 @@
         </div>
 
         <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
-        <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
-        <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
-        <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
-            <b-progress :max="max"
-                        class="mb-3 centerTh">
-                <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
-            </b-progress>
-        </div>
-
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
         </b-button>
         <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()"
                   :disabled="!isRunning || !connected">Stop
         </b-button>
+        <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
+        <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
+        <div v-show="isRunning">
+            All calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate.replace("T", " ").substring(0, queryableInEgressAfterDate.indexOf("."))}}</div>
+        <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
+            <b-progress :max="max"
+            class="mb-3 centerTh">
+                <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
+            </b-progress>
+        </div>
+
     </div>
 </template>
 
@@ -226,19 +230,24 @@
                         const self = this;
 
                         this.stompClient.subscribe("/topic/messages", message => {
+
                             console.log(message);
-                            console.log(message.body.injectionProgress);
                             const body = JSON.parse(message.body);
                             this.injectionProgress = body.injectionProgress
-                            this.callsInjected = body.callsInjected
-                            this.callsPerSecond = body.callsPerSecond
+                            this.callsInjected = body.callsInjected.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            this.callsPerSecond = body.callsPerSecond.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.remainingSeconds = body.remainingSeconds
-                            this.isRunning = body.running
+                            this.queryableInEgressAfterDate = body.queryableInEgressAfterDate
                             this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
+                            const totalCalls = body.totalCallsToInject === 0 ? undefined:body.totalCallsToInject.toString().replace(",", "")
 
                             self.$nextTick(function () {
                                 self.connected = true
                                 self.isRunning = body.running
+                                self.isTurboMode = body.turboMode
+                                if(self.isRunning){
+                                    this.callsToInject = totalCalls
+                                }
                             })
 
                             // this.received_messages.push(JSON.parse(message.body).content);
