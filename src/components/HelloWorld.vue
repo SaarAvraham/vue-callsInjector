@@ -15,8 +15,8 @@
 
         <status-indicator v-if="connected" status="positive" pulse="true"/>
         <status-indicator v-else status="negative"/>
-        <label v-if="connected" style="padding-left: 8px; padding-right: 1px; padding-bottom: 5px">Connected</label>
-        <label v-else style="padding-left: 8px; padding-right: 1px; padding-bottom: 5px;"> Disconnected</label>
+        <label v-if="connected" style="padding-left: 10px; padding-right: 1px; padding-bottom: 5px">Connected</label>
+        <label v-else style="padding-left: 10px; padding-right: 1px; padding-bottom: 5px;"> Disconnected</label>
 
         <div>
             <b-form-group
