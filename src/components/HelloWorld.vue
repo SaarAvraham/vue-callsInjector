@@ -186,7 +186,7 @@
                 this.startRequest.isTurboMode = this.isTurboMode
                 this.startRequest.callsToInject = this.callsToInject
                 let requestClone = JSON.parse(JSON.stringify(this.startRequest));
-                requestClone.callsToInject = requestClone.callsToInject.toString().replaceAll(',', '')
+                requestClone.callsToInject = requestClone.callsToInject.toString().replace(/,/g, '')
                 console.log(requestClone)
                 axios.post('http://localhost:9090/start', requestClone)
                     .then(response => {
