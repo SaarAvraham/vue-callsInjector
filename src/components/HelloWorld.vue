@@ -23,7 +23,6 @@
                     <b-form-input id="nested-street" style="width: 332px; text-align: left"
                                   v-model="callsToInject"
                                   required
-                                  :disabled="isRunning"
                     ></b-form-input>
                 </b-form-group>
 
@@ -68,7 +67,7 @@
             </b-form-group>
         </div>
 
-        <b-form-checkbox v-model="isTurboMode" :disabled="isRunning">Turbo Mode</b-form-checkbox>
+        <b-form-checkbox v-model="isTurboMode" >Turbo Mode</b-form-checkbox>
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
         </b-button>
