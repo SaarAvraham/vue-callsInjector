@@ -274,7 +274,33 @@
     }
 </script>
 
-<style scoped>
+<style>
+    :root {
+        --status-indicator-size: 15px;
+        --status-indicator-animation-duration: 2s;
+
+        --status-indicator-color: rgb(216, 226, 233);
+        --status-indicator-color-semi: rgba(216, 226, 233, .5);
+        --status-indicator-color-transparent: rgba(216, 226, 233, 0);
+
+        --status-indicator-color-active: rgb(0, 149, 255);
+        --status-indicator-color-active-semi: rgba(0, 149, 255, .5);
+        --status-indicator-color-active-transparent: rgba(0, 149, 255, 0);
+
+        --status-indicator-color-positive: rgb(75, 210, 143);
+        --status-indicator-color-positive-semi: rgba(75, 210, 143, .5);
+        --status-indicator-color-positive-transparent: rgba(75, 210, 143, 0);
+
+        --status-indicator-color-intermediary: rgb(255, 170, 0);
+        --status-indicator-color-intermediary-semi: rgba(255, 170, 0, .5);
+        --status-indicator-color-intermediary-transparent: rgba(255, 170, 0, 0);
+
+        --status-indicator-color-negative: rgb(255, 77, 77);
+        --status-indicator-color-negative-semi: rgba(255, 77, 77, .5);
+        --status-indicator-color-negative-transparent: rgba(255, 77, 77, 0);
+    }
+
+
     .marDown {
         margin-bottom: 70px;
     }
