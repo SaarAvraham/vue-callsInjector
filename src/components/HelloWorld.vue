@@ -129,8 +129,8 @@
                 retryTimeout: undefined,
 
                 opens: 'center',
-                minDate: '2019-05-02 04:00:00',
-                maxDate: '2020-12-26 14:00:00',
+                minDate: '2016-05-02 04:00:00',
+                maxDate: '2030-12-26 14:00:00',
                 single_range_picker: false,
                 show_ranges: true,
                 singleDatePicker: false,
