@@ -241,6 +241,7 @@
 
                             console.log(message);
                             const body = JSON.parse(message.body);
+                            this.injectionProgress = body.injectionProgress
                             this.callsInjected = body.callsInjected.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.callsPerSecond = body.callsPerSecond.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.remainingSeconds = body.remainingSeconds
