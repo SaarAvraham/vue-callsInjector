@@ -74,11 +74,14 @@
         <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()"
                   :disabled="!isRunning || !connected">Stop
         </b-button>
-        <div v-show="isRunning || injectionProgress===100">Calls injected: {{callsInjected}}</div>
+        <div v-show="isRunning || injectionProgress===100">Calls Injected: {{callsInjected}}</div>
         <div v-show="isRunning || injectionProgress===100">Calls Per Second: {{callsPerSecond}}</div>
         <div v-show="isRunning || injectionProgress===100">
-            All calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div>
+            All Calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div>
         <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
+              <b-tooltip target="tooltip-target-1" triggers="hover">
+    I am tooltip <b>component</b> content!
+  </b-tooltip>
             <b-progress :max="max"
             class="mb-3 centerTh">
                 <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
@@ -117,11 +120,13 @@
         },
         watch: {
             callsToInject: function (newValue) {
+                if(newValue !== undefined){
                 const result = newValue.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                 this.$nextTick(() => {
                     this.callsToInject = result
                 })
+                }
             }
         },
         data: function () {
@@ -186,6 +191,7 @@
                 this.startRequest.callsToInject = this.callsToInject
                 let requestClone = JSON.parse(JSON.stringify(this.startRequest));
                 requestClone.callsToInject = requestClone.callsToInject.toString().replace(/,/g, '')
+                console.log('Sending start request')
                 console.log(requestClone)
                 axios.post('http://localhost:9090/start', requestClone)
                     .then(response => {
@@ -196,6 +202,7 @@
                     })
             },
             sendStopRequest: function () {
+                console.log('Sending stop request')
                 axios.delete('http://localhost:9090/stop')
                     .then(response => {
                         console.log(response.data)
@@ -234,23 +241,31 @@
 
                             console.log(message);
                             const body = JSON.parse(message.body);
-                            this.injectionProgress = body.injectionProgress
                             this.callsInjected = body.callsInjected.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.callsPerSecond = body.callsPerSecond.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.remainingSeconds = body.remainingSeconds
                             if(body.queryableInEgressAfterDate !== null && body.queryableInEgressAfterDate !== undefined){
                                 this.queryableInEgressAfterDate = body.queryableInEgressAfterDate.replace("T", " ").substring(0, body.queryableInEgressAfterDate.indexOf("."))
                             }
-                            this.startRequest.callsToInject = body.totalCallsToInject === 0 ? undefined : body.totalCallsToInject
-                            const totalCalls = body.totalCallsToInject === 0 ? undefined:body.totalCallsToInject.toString().replace(",", "")
+                            
+                            this.startRequest.callsToInject = body.totalCallsToInject === null ? undefined : body.totalCallsToInject
+                            const totalCalls = body.totalCallsToInject === null ? undefined:body.totalCallsToInject.toString().replace(",", "")
 
                             self.$nextTick(function () {
+                                if(body.startDate !== null && body.endDate){
+                                  self.startRequest.dateRange = {
+                                     startDate: body.startDate,
+                                        endDate: body.endDate
+                                 }
+                                }
+
+                                self.injectionProgress = body.injectionProgress
                                 self.connected = true
                                 self.isRunning = body.running
                                 self.isTurboMode = body.turboMode
-                                if(self.isRunning){
-                                    this.callsToInject = totalCalls
-                                }
+                                // if(self.isRunning){
+                                    self.callsToInject = totalCalls
+                                // }
                             })
 
                             // this.received_messages.push(JSON.parse(message.body).content);
@@ -299,7 +314,6 @@
         --status-indicator-color-negative-semi: rgba(255, 77, 77, .5);
         --status-indicator-color-negative-transparent: rgba(255, 77, 77, 0);
     }
-
 
     .marDown {
         margin-bottom: 70px;
