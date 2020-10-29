@@ -133,6 +133,8 @@
             return {
                 retryTimeout: undefined,
 
+                baseUrl: window.location.host.toString().substring(0, window.location.host.toString().indexOf(':')),
+
                 opens: 'center',
                 minDate: '2016-05-02 04:00:00',
                 maxDate: '2030-12-26 14:00:00',
@@ -193,7 +195,7 @@
                 requestClone.callsToInject = requestClone.callsToInject.toString().replace(/,/g, '')
                 console.log('Sending start request')
                 console.log(requestClone)
-                axios.post('http://localhost:9090/start', requestClone)
+                axios.post("http://"+this.baseUrl+":9090/start", requestClone)
                     .then(response => {
                         console.log(response.data)
                         if (response.status === 200) {
@@ -203,7 +205,7 @@
             },
             sendStopRequest: function () {
                 console.log('Sending stop request')
-                axios.delete('http://localhost:9090/stop')
+                axios.delete("http://"+this.baseUrl+":9090/stop")
                     .then(response => {
                         console.log(response.data)
                         if (response.status === 200) {
@@ -227,7 +229,7 @@
                 }
 
                 console.log('Trying to connect to the server');
-                const socket = new SockJS("http://localhost:9090/updates");
+                const socket = new SockJS("http://"+this.baseUrl+":9090/updates");
                 this.stompClient = Stomp.over(socket);
 
                 this.stompClient.connect(
