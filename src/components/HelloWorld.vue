@@ -74,9 +74,9 @@
         <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()"
                   :disabled="!isRunning || !connected">Stop
         </b-button>
-        <div v-show="isRunning">Calls injected: {{callsInjected}}</div>
-        <div v-show="isRunning">Calls Per Second: {{callsPerSecond}}</div>
-        <div v-show="isRunning">
+        <div v-show="isRunning || injectionProgress===100">Calls injected: {{callsInjected}}</div>
+        <div v-show="isRunning || injectionProgress===100">Calls Per Second: {{callsPerSecond}}</div>
+        <div v-show="isRunning || injectionProgress===100">
             All calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div>
         <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
             <b-progress :max="max"
