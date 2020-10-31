@@ -67,26 +67,46 @@
             </b-form-group>
         </div>
 
-        <b-form-checkbox v-model="isTurboMode" >Turbo Mode</b-form-checkbox>
+        <b-form-checkbox v-model="isDLOnly" style="margin-left: 25px">Data Lake Only</b-form-checkbox>
+        <b-form-checkbox v-model="isTurboMode" style="margin-bottom: 5px">Turbo Mode</b-form-checkbox>
+
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
         </b-button>
         <b-button variant="danger" style="margin: 8px 8px 8px 8px" @click="sendStopRequest()"
                   :disabled="!isRunning || !connected">Stop
         </b-button>
-        <div v-show="isRunning || injectionProgress===100">Calls Injected: {{callsInjected}}</div>
-        <div v-show="isRunning || injectionProgress===100">Calls Per Second: {{callsPerSecond}}</div>
-        <div v-show="isRunning || injectionProgress===100">
-            All Calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div>
-        <div style="width: 70%; alignment: center; margin-left: auto; margin-right: auto">
-              <b-tooltip target="tooltip-target-1" triggers="hover">
-    I am tooltip <b>component</b> content!
-  </b-tooltip>
+        
+        <h5 v-show="isRunning || injectionProgress===100" style="margin-top: 80px; text-decoration: underline;">Stats</h5>
+        <div style="margin-left: 30px" v-show="isRunning || injectionProgress===100">
+                <b-form-group label-cols-sm="6" label="Calls Injected:" label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0" >
+                    <b-form-row id="nested-street11" style="width: 332px; text-align: left">{{callsInjected}}</b-form-row>
+                </b-form-group>
+
+                <b-form-group label-cols-sm="6" label="Calls Per Second:" label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0">
+                    <b-form-row style="width: 332px; text-align: left" >{{callsPerSecond}}</b-form-row>
+                </b-form-group>
+                
+                <b-form-group label-cols-sm="6" label="Injection Will Be Over At : " label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0">
+                    <b-form-row style="width: 332px; text-align: left" >{{injectionIsDoneAfterDate}}</b-form-row>
+                </b-form-group>
+
+                <b-form-group label-cols-sm="6" label="All Calls Will Be Queryable From Egress After (Approx.): " label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0">
+                    <b-form-row style="width: 332px; text-align: left" >{{queryableInEgressAfterDate}}</b-form-row>
+                </b-form-group>
+        </div>
+
+        <div v-show="isRunning || injectionProgress === 100" style="width: 70%; alignment: center; margin-top: 20px; margin-left: auto; margin-right: auto">
             <b-progress :max="max"
             class="mb-3 centerTh">
                 <b-progress-bar :value="injectionProgress" :label="`${injectionProgress}%`"></b-progress-bar>
             </b-progress>
         </div>
+<!-- 
+        <div v-show="isRunning || injectionProgress===100">Calls Injected: {{callsInjected}}</div>
+        <div v-show="isRunning || injectionProgress===100">Calls Per Second: {{callsPerSecond}}</div>
+        <div v-show="isRunning || injectionProgress===100">Injection Will Be Over At (Approx.): {{injectionIsDoneAfterDate}}</div>
+        <div v-show="isRunning || injectionProgress===100">All Calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div> -->
 
     </div>
 </template>
@@ -120,7 +140,7 @@
         },
         watch: {
             callsToInject: function (newValue) {
-                if(newValue !== undefined){
+                if(newValue !== undefined && newValue !== null){
                 const result = newValue.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                 this.$nextTick(() => {
@@ -152,8 +172,10 @@
                 closeOnEsc: true,
                 callsToInject: undefined,
 
+                injectionIsDoneAfterDate: undefined,
                 queryableInEgressAfterDate: undefined,
 
+                isDLOnly: true,
                 isTurboMode: false,
                 isRunning: false,
                 callsInjected: undefined,
@@ -162,9 +184,6 @@
                 //     startDate: undefined,
                 //     endDate: undefined
                 // },
-                form: {
-                    callsToInject: undefined
-                },
                 types: [
                     'number'
                 ],
@@ -179,7 +198,8 @@
                         endDate: undefined,
                         startDate: undefined
                     },
-                    isTurboMode: false
+                    isTurboMode: false,
+                    isDLOnly: true
                 }
             }
         },
@@ -190,6 +210,8 @@
             },
             sendInjectRequest: function () {
                 this.startRequest.isTurboMode = this.isTurboMode
+                this.startRequest.isDLOnly = this.isDLOnly
+
                 this.startRequest.callsToInject = this.callsToInject
                 let requestClone = JSON.parse(JSON.stringify(this.startRequest));
                 requestClone.callsToInject = requestClone.callsToInject.toString().replace(/,/g, '')
@@ -197,6 +219,7 @@
                 console.log(requestClone)
                 axios.post("http://"+this.baseUrl+":9090/start", requestClone)
                     .then(response => {
+                        this.injectionProgress = 0
                         console.log(response.data)
                         if (response.status === 200) {
                             this.isRunning = true
@@ -240,7 +263,7 @@
                         const self = this;
 
                         this.stompClient.subscribe("/topic/messages", message => {
-
+                            console.log('Writing WS message to log')
                             console.log(message);
                             const body = JSON.parse(message.body);
                             this.injectionProgress = body.injectionProgress
@@ -250,9 +273,13 @@
                             if(body.queryableInEgressAfterDate !== null && body.queryableInEgressAfterDate !== undefined){
                                 this.queryableInEgressAfterDate = body.queryableInEgressAfterDate.replace("T", " ").substring(0, body.queryableInEgressAfterDate.indexOf("."))
                             }
+
+                            if(body.injectionIsDoneAfterDate !== null && body.injectionIsDoneAfterDate !== undefined){
+                                this.injectionIsDoneAfterDate = body.injectionIsDoneAfterDate.replace("T", " ").substring(0, body.injectionIsDoneAfterDate.indexOf("."))
+                            }
                             
-                            this.startRequest.callsToInject = body.totalCallsToInject === null ? undefined : body.totalCallsToInject
-                            const totalCalls = body.totalCallsToInject === null ? undefined:body.totalCallsToInject.toString().replace(",", "")
+                            this.startRequest.callsToInject = body.totalCallsToInject === null ? this.totalCallsToInject : body.totalCallsToInject
+                            const totalCalls = body.totalCallsToInject === null ? this.callsToInject:body.totalCallsToInject.toString().replace(",", "")
 
                             self.$nextTick(function () {
                                 if(body.startDate !== null && body.endDate){
@@ -261,13 +288,19 @@
                                         endDate: body.endDate
                                  }
                                 }
+                                    self.callsToInject = totalCalls
 
                                 self.injectionProgress = body.injectionProgress
                                 self.connected = true
                                 self.isRunning = body.running
-                                self.isTurboMode = body.turboMode
+                                if(body.turboMode !== null && body.turboMode !== undefined) {
+                                    self.isTurboMode = body.turboMode
+                                }  
+                                if(body.isDLOnly !== null && body.isDLOnly !== undefined) {
+                                    self.isDLOnly = body.isDLOnly
+                                }  
+
                                 // if(self.isRunning){
-                                    self.callsToInject = totalCalls
                                 // }
                             })
 
@@ -320,11 +353,6 @@
 
     .marDown {
         margin-bottom: 70px;
-    }
-
-    .centerTh {
-        margin-top: 180px;
-
     }
 
     .centerTh1 {
