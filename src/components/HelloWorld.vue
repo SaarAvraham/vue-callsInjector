@@ -104,8 +104,8 @@
         </div>
 <!-- 
         <div v-show="isRunning || injectionProgress===100">Calls Injected: {{callsInjected}}</div>
-        <div v-show="isRunning || injectionProgress===100">Calls Per Second: {{callsPerSecond}}</div>
-        <div v-show="isRunning || injectionProgress===100">Injection Will Be Over At (Approx.): {{injectionIsDoneAfterDate}}</div>
+        <div v-show="isRunning || injectionProgress===100">Calls per Second: {{callsPerSecond}}</div>
+        <div v-show="isRunning || injectionProgress===100">Injection Will Be Over at (Approx.): {{injectionIsDoneAfterDate}}</div>
         <div v-show="isRunning || injectionProgress===100">All Calls Will Be Queryable From Egress After (Approx.): {{queryableInEgressAfterDate}}</div> -->
 
     </div>

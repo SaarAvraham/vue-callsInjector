@@ -1,9 +1,9 @@
 <template>
   <div id="app">
       <vue-headful
-              title="Data Lake Calls Injector"
+              title="Calls Injector"
       />
-      <HelloWorld msg="Data Lake Calls Injector"/>
+      <HelloWorld msg="Calls Injector"/>
   </div>
 </template>
 
