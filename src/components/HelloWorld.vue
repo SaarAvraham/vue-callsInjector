@@ -91,9 +91,9 @@
                     <b-form-row style="width: 332px; text-align: left" >{{injectionIsDoneAfterDate}}</b-form-row>
                 </b-form-group>
 
-                <b-form-group label-cols-sm="6" label="All Calls Will Be Queryable From Egress After (Approx.): " label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0">
-                    <b-form-row style="width: 332px; text-align: left" >{{queryableInEgressAfterDate}}</b-form-row>
-                </b-form-group>
+                  <!-- b-form-group label-cols-sm="6" label="All Calls Will Be Queryable From Egress After (Approx.): " label-align-sm="right" label-for="nested-street11" label-class="pt-0" class="mb-0">
+                     <b-form-row style="width: 332px; text-align: left" >{{queryableInEgressAfterDate}}</b-form-row>
+                 </b-form-group-->
         </div>
 
         <div v-show="isRunning || injectionProgress === 100" style="width: 70%; alignment: center; margin-top: 20px; margin-left: auto; margin-right: auto">
