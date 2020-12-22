@@ -26,7 +26,6 @@
                     ></b-form-input>
                 </b-form-group>
 
-
                 <b-form-group
                         label-cols-sm="3"
                         label="Select Date Range:"
@@ -64,11 +63,45 @@
                     </b-row>
                     <!--                    </b-form-input>-->
                 </b-form-group>
+                    <b-form-group
+                            label-cols-sm="3"
+                            label="Calls Per Second:"
+                            label-align-sm="right"
+                            label-for="nested-street32"
+                    >
+                    <b-row style="padding-left: 15px">
+                        <b-form-input 
+                        style="width: 332px; alignment: left; margin-top: 8px; margin-left: 0px; margin-right: 8px" 
+                    id="range-1" v-model="cpsUserValue" type="range" min="100" max="5000" step="100" ></b-form-input> 
+                                            <div class="mt-2" style="margin-left: 57px;alignment: left; margin-top: 0px; margin-left: 0px; margin-right: auto"> {{ cpsUserView }}</div>
+           
+                    </b-row>
+
+                    <!-- <b-row> -->
+                        <!-- <b-form-input id="nested-street32" v-model="cpsUserView" class="mt-2" style="width: 332px; text-align: left"> {{ cpsUserView }}</b-form-input> -->
+                    <!-- </b-row> -->
+                    
+                    <!-- <b-row style="padding-left: 15px">
+                        <b-form-input 
+                        style="width: 332px; alignment: left; margin-top: 8px; margin-left: 0px;margin-bottom: 0px; margin-right: 8px" 
+                    id="range-1" v-model="cpsUserValue" type="range" min="100" max="5000" step="100" ></b-form-input> 
+                    </b-row> -->
+
+
+
+<!--                     <b-row style="padding-left: 15px">
+                        <div class="mt-2" style="margin-left: 57px;"> {{ cpsUserView }} Calls per Second</div>
+                    </b-row> -->
+                    </b-form-group>
             </b-form-group>
+            
         </div>
 
-        <b-form-checkbox v-model="isDLOnly" style="margin-left: 25px">Data Lake Only</b-form-checkbox>
-        <b-form-checkbox v-model="isTurboMode" style="margin-bottom: 5px">Turbo Mode</b-form-checkbox>
+        <b-form-checkbox v-model="isDLOnly" style="margin-left: 25px; margin-bottom: 5px">Data Lake Only</b-form-checkbox>
+        
+<!--         <b-form-checkbox v-model="isTurboMode" style="margin-bottom: 5px">Turbo Mode</b-form-checkbox> -->
+
+
 
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
@@ -143,14 +176,28 @@
                 if(newValue !== undefined && newValue !== null){
                 const result = newValue.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-                this.$nextTick(() => {
-                    this.callsToInject = result
-                })
+                this.$nextTick(() => { this.callsToInject = result})
+                }
+            },
+            cpsUserValue: function (newVal) {
+                if(newVal !== undefined && newVal !== null){
+                    let result;
+
+                    if(newVal == 5000){
+                        result = "Max"
+                    }
+                    else{
+                        result = newVal.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    }
+
+                    this.$nextTick(() => {this.cpsUserView = result})
                 }
             }
         },
         data: function () {
             return {
+                cpsUserView: "Max",
+                cpsUserValue: 5000,
                 retryTimeout: undefined,
 
                 baseUrl: window.location.host.toString().substring(0, window.location.host.toString().indexOf(':')),
@@ -176,7 +223,7 @@
                 queryableInEgressAfterDate: undefined,
 
                 isDLOnly: true,
-                isTurboMode: false,
+              /*   isTurboMode: false, */
                 isRunning: false,
                 callsInjected: undefined,
                 callsPerSecond: undefined,
@@ -194,11 +241,12 @@
                 connected: false,
                 startRequest: {
                     callsToInject: undefined,
+                    cpsUserValue: undefined,
                     dateRange: {
                         endDate: undefined,
                         startDate: undefined
                     },
-                    isTurboMode: false,
+                    /* isTurboMode: false, */
                     isDLOnly: true
                 }
             }
@@ -209,7 +257,8 @@
                 this.dateRange.endDate = date.endDate
             },
             sendInjectRequest: function () {
-                this.startRequest.isTurboMode = this.isTurboMode
+                /* this.startRequest.isTurboMode = true */
+                this.startRequest.callsPerSecond = this.cpsUserValue
                 this.startRequest.isDLOnly = this.isDLOnly
 
                 this.startRequest.callsToInject = this.callsToInject
@@ -270,6 +319,7 @@
                             this.callsInjected = body.callsInjected.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.callsPerSecond = body.callsPerSecond.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                             this.remainingSeconds = body.remainingSeconds
+
                             if(body.queryableInEgressAfterDate !== null && body.queryableInEgressAfterDate !== undefined){
                                 this.queryableInEgressAfterDate = body.queryableInEgressAfterDate.replace("T", " ").substring(0, body.queryableInEgressAfterDate.indexOf("."))
                             }
@@ -282,29 +332,34 @@
                             const totalCalls = body.totalCallsToInject === null ? this.callsToInject:body.totalCallsToInject.toString().replace(",", "")
 
                             self.$nextTick(function () {
+
+                            if(body.requestedCallsPerSecond !== null && body.requestedCallsPerSecond !== undefined) {
+                                self.cpsUserValue = body.requestedCallsPerSecond
+                                self.cpsUserValue
+                            }  
+
                                 if(body.startDate !== null && body.endDate){
                                   self.startRequest.dateRange = {
                                      startDate: body.startDate,
                                         endDate: body.endDate
                                  }
                                 }
-                                    self.callsToInject = totalCalls
+                                
 
+                                self.callsToInject = totalCalls
+                                    
                                 self.injectionProgress = body.injectionProgress
                                 self.connected = true
                                 self.isRunning = body.running
-                                if(body.turboMode !== null && body.turboMode !== undefined) {
+   /*                              if(body.turboMode !== null && body.turboMode !== undefined) {
                                     self.isTurboMode = body.turboMode
-                                }  
+                                }   */
                                 if(body.isDLOnly !== null && body.isDLOnly !== undefined) {
                                     self.isDLOnly = body.isDLOnly
                                 }  
 
-                                // if(self.isRunning){
-                                // }
                             })
 
-                            // this.received_messages.push(JSON.parse(message.body).content);
                         });
 
                         while (this.retryTimeout--) {
