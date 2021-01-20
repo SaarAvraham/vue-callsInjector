@@ -71,37 +71,49 @@
                     >
                     <b-row style="padding-left: 15px">
                         <b-form-input 
-                        style="width: 332px; alignment: left; margin-top: 8px; margin-left: 0px; margin-right: 8px" 
+                        style="width: 332px; alignment: left; margin-top: 8px; margin-left: 0px; margin-right: 8px; margin-bottom: 0px;" 
                     id="range-1" v-model="cpsUserValue" type="range" min="100" max="5000" step="100" ></b-form-input> 
-                                            <div class="mt-2" style="margin-left: 57px;alignment: left; margin-top: 0px; margin-left: 0px; margin-right: auto"> {{ cpsUserView }}</div>
+                                            <div class="mt-2" style="alignment: left; margin-top: 0px; margin-left: 0px; margin-right: auto"> {{ cpsUserView }}</div>
            
                     </b-row>
+                    </b-form-group>
 
-                    <!-- <b-row> -->
-                        <!-- <b-form-input id="nested-street32" v-model="cpsUserView" class="mt-2" style="width: 332px; text-align: left"> {{ cpsUserView }}</b-form-input> -->
-                    <!-- </b-row> -->
-                    
-                    <!-- <b-row style="padding-left: 15px">
-                        <b-form-input 
-                        style="width: 332px; alignment: left; margin-top: 8px; margin-left: 0px;margin-bottom: 0px; margin-right: 8px" 
-                    id="range-1" v-model="cpsUserValue" type="range" min="100" max="5000" step="100" ></b-form-input> 
-                    </b-row> -->
+                    <b-form-group
+                            label-cols-sm="3"
+                            label="Business Data Definition (Optional):"
+                            label-align-sm="right"
+                            label-for="nested-street32"
+                    >
+                    <b-row style="padding-left: 15px">
+        <b-form-file :placeholder="dsadsds" v-model="file" style="margin-left: 0px; margin-bottom: 5px; padding-top: 5px" plain ></b-form-file>
 
+           
+                    </b-row>
+                    </b-form-group>
 
+                                        <b-form-group
+                            label-cols-sm="3"
+                            label=""
+                            label-align-sm="right"
+                            label-for="nested-street32"
+                    >
+                    <b-row style="padding-left: 15px">
+        <b-form-checkbox v-model="isDLOnly" style="margin-bottom: 25px">Data Lake Only</b-form-checkbox>
 
-<!--                     <b-row style="padding-left: 15px">
-                        <div class="mt-2" style="margin-left: 57px;"> {{ cpsUserView }} Calls per Second</div>
-                    </b-row> -->
+           
+                    </b-row>
                     </b-form-group>
             </b-form-group>
+
+            
             
         </div>
 
-        <b-form-checkbox v-model="isDLOnly" style="margin-left: 25px; margin-bottom: 5px">Data Lake Only</b-form-checkbox>
-        
+
+        <!-- <b-form-checkbox v-model="isDLOnly" style="margin-left: 25px; margin-right: 80px;margin-bottom: 25px">Data Lake Only</b-form-checkbox> -->
+
+<!-- :placeholder="Optional - Upload a Busniness Data Definition File (JSON)" -->
 <!--         <b-form-checkbox v-model="isTurboMode" style="margin-bottom: 5px">Turbo Mode</b-form-checkbox> -->
-
-
 
         <b-button variant="primary" style="margin: 8px 8px 8px 8px" @click="sendInjectRequest()"
                   :disabled="isRunning || !connected">Start
@@ -172,6 +184,46 @@
             }
         },
         watch: {
+            file: function name(newFile) {
+                console.log('New file upload request')
+                this.file = newFile;
+            
+                var reader = new FileReader();
+                reader.onload = (event) => {
+                    // isValid = true;
+                            console.log(event.target.result);
+                            try {
+                                var obj = JSON.parse(event.target.result);
+                                let businessDataArray = obj.businessdata;
+                                businessDataArray.forEach((json) => { 
+                                    if(json.Key === undefined) {
+                                        // isValid = false
+                                        throw new Error({'hehe':'haha'});
+                                    }
+                                    if(json.DataType === undefined || (json.DataType !== 'STRING' && json.DataType !== 'NUMBER')) {
+                                        // isValid = false
+                                        throw new Error({'hehe':'haha'});
+                                    
+                                    }
+                                });
+                                    // if(isValid){
+                                // alert("File seems to be valid...")
+                                    // }
+                            
+                            console.log(obj)
+                            this.startRequest.businessData = obj
+                            } catch (error) {
+                                alert("File is not a valid!");
+                                this.file = null;
+                                this.startRequest.businessData = null
+                            }
+                };
+                reader.readAsText(this.file);
+                // var businessData = JSON.parse(this.file)
+                // alert(businessData)
+                // console.log("new file uploaded!")
+                // console.log(businessData)
+            },
             callsToInject: function (newValue) {
                 if(newValue !== undefined && newValue !== null){
                 const result = newValue.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -223,6 +275,7 @@
                 queryableInEgressAfterDate: undefined,
 
                 isDLOnly: true,
+                isWithBD: true,
               /*   isTurboMode: false, */
                 isRunning: false,
                 callsInjected: undefined,
@@ -247,8 +300,12 @@
                         startDate: undefined
                     },
                     /* isTurboMode: false, */
-                    isDLOnly: true
-                }
+                    isDLOnly: true,
+                    isWithBD: true,
+                    businessData: null
+                },
+
+                file: null
             }
         },
         methods: {
@@ -260,6 +317,7 @@
                 /* this.startRequest.isTurboMode = true */
                 this.startRequest.callsPerSecond = this.cpsUserValue
                 this.startRequest.isDLOnly = this.isDLOnly
+                this.startRequest.isWithBD = this.isWithBD
 
                 this.startRequest.callsToInject = this.callsToInject
                 let requestClone = JSON.parse(JSON.stringify(this.startRequest));
@@ -358,6 +416,9 @@
                                     self.isDLOnly = body.isDLOnly
                                 }  
 
+                                if(body.isWithBD !== null && body.isWithBD !== undefined) {
+                                    self.isWithBD = body.isWithBD
+                                }  
                             })
 
                         });
